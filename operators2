@@ -1,0 +1,89 @@
+#include <stdio.h>
+#include <stdbool.h>
+#include <ctype.h>
+
+// Check if character is an arithmetic operator: +, -, *, /
+bool isArithmeticOperator(char ch) {
+    return ch == '+' || ch == '-' || ch == '*' || ch == '/';
+}
+
+// Check if character is a relational operator: >, <, >=, <=, ==, !=
+bool isRelationalOperator(char ch, char next) {
+    if ((ch == '>' || ch == '<') && next == '=') return true;
+    if ((ch == '=' || ch == '!') && next == '=') return true;
+    if (ch == '>' || ch == '<') return true;
+    return false;
+}
+
+// Check if string is an integer constant
+bool isConstant(const char *str) {
+    if (!isdigit(str[0])) return false;
+    for (int i = 1; str[i] != '\0'; i++) {
+        if (!isdigit(str[i])) return false;
+    }
+    return true;
+}
+
+void simulateFA(const char *input) {
+    char token[100];
+    int i = 0, j = 0;
+
+    while (input[i] != '\0') {
+        // Skip spaces
+        if (input[i] == ' ') {
+            token[j] = '\0';
+            if (j > 0) {
+                if (isConstant(token))
+                    printf("Token: Constant, Value: %s\n", token);
+                else
+                    printf("Token: Invalid, Value: %s\n", token);
+                j = 0;
+            }
+            i++;
+            continue;
+        }
+
+        // Handle relational operators (can be 1 or 2 chars)
+        if (isRelationalOperator(input[i], input[i + 1])) {
+            if ((input[i + 1] == '=' && (input[i] == '<' || input[i] == '>' || input[i] == '!' || input[i] == '='))) {
+                printf("Token: Relational Operator, Value: %c%c\n", input[i], input[i + 1]);
+                i += 2;
+            } else {
+                printf("Token: Relational Operator, Value: %c\n", input[i]);
+                i++;
+            }
+            continue;
+        }
+
+        // Handle arithmetic operators
+        if (isArithmeticOperator(input[i])) {
+            printf("Token: Arithmetic Operator, Value: %c\n", input[i]);
+            i++;
+            continue;
+        }
+
+        // Accumulate digits into token
+        if (isdigit(input[i])) {
+            token[j++] = input[i++];
+            continue;
+        }
+
+        // Handle unexpected characters
+        token[j++] = input[i++];
+    }
+
+    // Check for final token
+    token[j] = '\0';
+    if (j > 0 && isConstant(token)) {
+        printf("Token: Constant, Value: %s\n", token);
+    } else if (j > 0) {
+        printf("Token: Invalid, Value: %s\n", token);
+    }
+}
+
+int main() {
+    const char *expression = "123 + 456 <= 789 != 100 * 3";
+    printf("Processing Expression: %s\n", expression);
+    simulateFA(expression);
+    return 0;
+}
