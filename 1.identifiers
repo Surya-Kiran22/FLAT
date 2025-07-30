@@ -1,0 +1,58 @@
+#include <stdio.h>
+#include <stdbool.h>
+#include <string.h>
+#include <ctype.h>
+
+// Check if a string is a keyword
+bool isKeyword(const char *str) {
+    const char *keywords[] = { "int", "float", "char", "else", "end" };
+    for (int i = 0; i < sizeof(keywords) / sizeof(keywords[0]); i++) {
+        if (strcmp(str, keywords[i]) == 0)
+            return true;
+    }
+    return false;
+}
+
+// Check if a string is a valid identifier
+bool isValidIdentifier(const char *str) {
+    if (!isalpha(str[0]) && str[0] != '_') return false;
+
+    for (int i = 1; str[i] != '\0'; i++) {
+        if (!isalnum(str[i]) && str[i] != '_') return false;
+    }
+
+    return true && !isKeyword(str); // keywords aren't identifiers
+}
+
+void processToken(const char *token) {
+    if (isKeyword(token))
+        printf("Token: Keyword, Value: %s\n", token);
+    else if (isValidIdentifier(token))
+        printf("Token: Identifier, Value: %s\n", token);
+    else
+        printf("Token: Invalid, Value: %s\n", token);
+}
+
+// Simulated lexer using FA-like logic
+int main() {
+    char input[] = "int x float end char else var1";
+    char token[100];
+    int i = 0, j = 0;
+
+    while (input[i] != '\0') {
+        if (input[i] == ' ' || input[i] == '\n') {
+            token[j] = '\0';
+            if (j > 0) processToken(token);
+            j = 0;
+        } else {
+            token[j++] = input[i];
+        }
+        i++;
+    }
+
+    // Last token
+    token[j] = '\0';
+    if (j > 0) processToken(token);
+
+    return 0;
+}
